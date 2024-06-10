@@ -10,9 +10,27 @@
 
 ## Pipeline tools
 
-- [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [EnsemblVEP](https://pubmed.ncbi.nlm.nih.gov/27268795/)
 
-  > Andrews, S. (2010). FastQC: A Quality Control Tool for High Throughput Sequence Data [Online].
+  > McLaren W, Gil L, Hunt SE, et al.: The Ensembl Variant Effect Predictor. Genome Biol. 2016 Jun 6;17(1):122. doi: 10.1186/s13059-016-0974-4. PubMed PMID: 27268795; PubMed Central PMCID: PMC4893825.
+
+- [SpliceAI](https://pubmed.ncbi.nlm.nih.gov/30661751/)
+
+  > Jaganathan K, et al.: Predicting Splicing from Primary Sequence with Deep Learning. Cell. 2019 Jan 24;176(3):535-548.e24. doi: 10.1016/j.cell.2018.12.015. PubMed PMID: 30661751.
+
+- [SpliceRegion](https://github.com/Ensembl/VEP_plugins/blob/release/106/SpliceRegion.pm)
+
+- [snpEff](https://pubmed.ncbi.nlm.nih.gov/22728672/)
+
+  > Cingolani P, Platts A, Wang le L, et al.: A program for annotating and predicting the effects of single nucleotide polymorphisms, SnpEff: SNPs in the genome of Drosophila melanogaster strain w1118; iso-2; iso-3. Fly (Austin). Apr-Jun 2012;6(2):80-92. doi: 10.4161/fly.19695. PubMed PMID: 22728672; PubMed Central PMCID: PMC3679285.
+
+- [Tabix](https://academic.oup.com/bioinformatics/article/27/5/718/262743)
+
+  > Li H, Tabix: fast retrieval of sequence features from generic TAB-delimited files, Bioinformatics, Volume 27, Issue 5, 1 March 2011, Pages 718–719, doi: 10.1093/bioinformatics/btq671. PubMed PMID: 21208982. PubMed Central PMCID: PMC3042176.
+
+- [VCFTools](https://pubmed.ncbi.nlm.nih.gov/21653522/)
+
+  > Danecek P, Auton A, Abecasis G, et al.: The variant call format and VCFtools. Bioinformatics. 2011 Aug 1;27(15):2156-8. doi: 10.1093/bioinformatics/btr330. Epub 2011 Jun 7. PubMed PMID: 21653522; PubMed Central PMCID: PMC3137218.
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
 

@@ -13,3 +13,23 @@ report_section_order:
 export_plots: true
 
 disable_version_detection: true
+
+# Run only these modules
+run_modules:
+  - custom_content
+  - vcftools
+  - snpeff
+  - vep
+
+module_order:
+  - vcftools:
+      name: "Vcftools"
+  - snpeff:
+      name: "SNPeff"
+  - vep:
+      name: "VEP"
+
+sp:
+  snpeff:
+    contents: "SnpEff_version"
+    max_filesize: 5000000
