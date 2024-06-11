@@ -14,28 +14,28 @@ include { VCF_ANNOTATE_ALL                            } from '../../subworkflows
 
 workflow VARIANTANNOTATION {
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
-    tools
-    bcftools_annotations
-    bcftools_annotations_tbi
-    bcftools_header_lines
-    snpeff_genome
-    snpeff_cache
-    vep_cache
-    vep_cache_version
-    vep_extra_files
-    vep_fasta
-    vep_genome
-    vep_species
+    samplesheet              // channel (queue): samplesheet read in from --input
+    tools                    // array
+    bcftools_annotations     // channel (value):
+    bcftools_annotations_tbi // channel (value):
+    bcftools_header_lines    // string
+    snpeff_genome            // string
+    snpeff_cache             // channel (value):
+    vep_cache                // channel (value):
+    vep_cache_version        // string
+    vep_extra_files          // array?
+    vep_fasta                // channel (value)
+    vep_genome               // string
+    vep_species              // string
 
     main:
-    ch_reports  = Channel.empty()
-    ch_versions = Channel.empty()
+    reports  = Channel.empty()
+    versions = Channel.empty()
 
     if (tools.split(',').contains('merge') || tools.split(',').contains('bcfann') || tools.split(',').contains('snpeff') || tools.split(',').contains('vep') ) {
 
         VCF_ANNOTATE_ALL(
-            ch_samplesheet.map{meta, vcf -> [ meta + [ file_name: vcf.baseName ], vcf ] },
+            samplesheet.map{meta, vcf -> [ meta + [ file_name: vcf.baseName ], vcf ] },
             vep_fasta,
             tools,
             snpeff_genome,
@@ -50,14 +50,14 @@ workflow VARIANTANNOTATION {
             bcftools_header_lines)
 
         // Gather used softwares versions
-        ch_reports  = ch_reports.mix(VCF_ANNOTATE_ALL.out.reports)
-        ch_versions = ch_versions.mix(VCF_ANNOTATE_ALL.out.versions)
+        reports  = reports.mix(VCF_ANNOTATE_ALL.out.reports)
+        versions = versions.mix(VCF_ANNOTATE_ALL.out.versions)
     }
 
 
     emit:
-    reports  = ch_reports  // channel: [ path(reports) ]
-    versions = ch_versions // channel: [ path(versions.yml) ]
+    reports  // channel: [ path(reports) ]
+    versions // channel: [ path(versions.yml) ]
 }
 
 /*
