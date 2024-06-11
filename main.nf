@@ -47,8 +47,8 @@ params.vep_species       = getGenomeAttribute('vep_species')
 
 fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
 
-bcftools_annotations    = params.bcftools_annotations    ? Channel.fromPath(params.bcftools_annotations).collect()      : Channel.empty()
-bcftools_header_lines   = params.bcftools_header_lines   ? Channel.fromPath(params.bcftools_header_lines).collect()     : Channel.empty()
+bcftools_annotations  = params.bcftools_annotations  ? Channel.fromPath(params.bcftools_annotations).collect()  : Channel.empty()
+bcftools_header_lines = params.bcftools_header_lines ? Channel.fromPath(params.bcftools_header_lines).collect() : Channel.empty()
 
 vep_extra_files = []
 
