@@ -17,20 +17,13 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { VARIANTANNOTATION               } from './workflows/variantannotation'
 
-include { MULTIQC                 } from './modules/nf-core/multiqc/main'
-include { paramsSummaryMap        } from 'plugin/nf-validation'
-include { methodsDescriptionText  } from './subworkflows/local/utils_nfcore_variantannotation_pipeline'
-include { paramsSummaryMultiqc    } from './subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML  } from './subworkflows/nf-core/utils_nfcore_pipeline'
-
-
-include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_variantannotation_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_variantannotation_pipeline'
-include { VARIANTANNOTATION       } from './workflows/variantannotation'
-
-include { ANNOTATION_CACHE_INITIALISATION  } from './subworkflows/local/annotation_cache_initialisation'
-include { DOWNLOAD_CACHE_SNPEFF_VEP        } from './subworkflows/local/download_cache_snpeff_vep'
+include { PIPELINE_INITIALISATION         } from './subworkflows/local/utils_nfcore_variantannotation_pipeline'
+include { ANNOTATION_CACHE_INITIALISATION } from './subworkflows/local/annotation_cache_initialisation'
+include { DOWNLOAD_CACHE_SNPEFF_VEP       } from './subworkflows/local/download_cache_snpeff_vep'
+include { GATHER_REPORTS_VERSIONS         } from './subworkflows/local/gather_reports_versions'
+include { PIPELINE_COMPLETION             } from './subworkflows/local/utils_nfcore_variantannotation_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,7 +38,8 @@ params.vep_cache_version = getGenomeAttribute('vep_cache_version')
 params.vep_genome        = getGenomeAttribute('vep_genome')
 params.vep_species       = getGenomeAttribute('vep_species')
 
-fasta = params.fasta ? Channel.fromPath(params.fasta).map{ it -> [ [id:it.baseName], it ] }.collect() : Channel.empty()
+fasta = params.fasta ? Channel.fromPath(params.fasta).map{ fasta -> [ [id:fasta.baseName], fasta ] }.collect() : Channel.empty()
+vep_fasta = params.vep_include_fasta ? fasta : [ [id: 'null'], [] ]
 
 bcftools_annotations  = params.bcftools_annotations  ? Channel.fromPath(params.bcftools_annotations).collect()  : Channel.empty()
 bcftools_header_lines = params.bcftools_header_lines ? Channel.fromPath(params.bcftools_header_lines).collect() : Channel.empty()
@@ -137,7 +131,6 @@ workflow {
         params.input
     )
 
-    vep_fasta =(params.vep_include_fasta) ? fasta.map{ fasta -> [ [ id:fasta.baseName ], fasta ] } : [[id: 'null'], []]
     bcftools_annotations_tbi  = params.bcftools_annotations ? params.bcftools_annotations_tbi ? Channel.fromPath(params.bcftools_annotations_tbi).collect() : PREPARE_GENOME.out.bcftools_annotations_tbi : Channel.empty([])
 
     // Download cache
@@ -153,11 +146,11 @@ workflow {
     } else {
         // Looks for cache information either locally or on the cloud
         ANNOTATION_CACHE_INITIALISATION(
-        (params.snpeff_cache && params.tools &&(params.tools.split(',').contains("snpeff") || params.tools.split(',').contains('merge'))),
+            (params.snpeff_cache && params.tools &&(params.tools.split(',').contains("snpeff") || params.tools.split(',').contains('merge'))),
             params.snpeff_cache,
             params.snpeff_genome,
             params.snpeff_db,
-        (params.vep_cache && params.tools &&(params.tools.split(',').contains("vep") || params.tools.split(',').contains('merge'))),
+            (params.vep_cache && params.tools &&(params.tools.split(',').contains("vep") || params.tools.split(',').contains('merge'))),
             params.vep_cache,
             params.vep_species,
             params.vep_cache_version,
@@ -186,36 +179,15 @@ workflow {
         params.vep_species
     )
 
-    // ALL THIS SHOULD BE ITS OWN SUBWORFKLOW
+    // GATHER REPORTS/VERSIONS AND RUN MULTIC
 
-    //
-    // Collate and save software versions
-    //
-    version_yaml = Channel.empty()
-    version_yaml = softwareVersionsToYAML(NFCORE_VARIANTANNOTATION.out.versions)
-        .collectFile(storeDir: "${params.outdir}/pipeline_info", name: 'nf_core_variantannotation_software_mqc_versions.yml', sort: true, newLine: true)
-
-    //
-    // MODULE: MultiQC
-    //
-    ch_multiqc_files                      = Channel.empty()
-    ch_multiqc_config                     = Channel.fromPath("$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config              = params.multiqc_config ? Channel.fromPath(params.multiqc_config, checkIfExists: true) : Channel.empty()
-    ch_multiqc_logo                       = params.multiqc_logo ? Channel.fromPath(params.multiqc_logo, checkIfExists: true) : Channel.empty()
-    summary_params                        = paramsSummaryMap(workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary                   = Channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ? file(params.multiqc_methods_description, checkIfExists: true) : file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = Channel.value(methodsDescriptionText(ch_multiqc_custom_methods_description))
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_files                      = ch_multiqc_files.mix(version_yaml)
-    ch_multiqc_files                      = ch_multiqc_files.mix(NFCORE_VARIANTANNOTATION.out.reports)
-    ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
-
-    MULTIQC(
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
+    GATHER_REPORTS_VERSIONS(
+        params.outdir,
+        params.multiqc_config,
+        params.multiqc_logo,
+        params.multiqc_methods_description,
+        NFCORE_VARIANTANNOTATION.out.versions,
+        NFCORE_VARIANTANNOTATION.out.reports
     )
 
     //
@@ -228,7 +200,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        MULTIQC.out.report.toList()
+        GATHER_REPORTS_VERSIONS.out.report
     )
 }
 
