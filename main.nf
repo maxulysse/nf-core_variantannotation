@@ -217,7 +217,6 @@ workflow {
         ch_multiqc_custom_config.toList(),
         ch_multiqc_logo.toList()
     )
-    multiqc_report = MULTIQC.out.report.toList()
 
     //
     // SUBWORKFLOW: Run completion tasks
@@ -229,7 +228,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        MULTIQC.out.multiqc_report
+        MULTIQC.out.report.toList()
     )
 }
 
