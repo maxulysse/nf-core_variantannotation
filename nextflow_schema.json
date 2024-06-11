@@ -277,21 +277,21 @@
                     "hidden": true,
                     "help_text": "Do not load `igenomes.config` when running the pipeline. You may choose this option if you observe clashes between custom parameters and those supplied in `igenomes.config`."
                 },
-            "snpeff_cache": {
-                "type": "string",
-                "format": "directory-path",
-                "fa_icon": "fas fa-cloud-download-alt",
-                "default": "s3://annotation-cache/snpeff_cache/",
-                "description": "Path to snpEff cache.",
-                "help_text": "Path to snpEff cache which should contain the relevant genome and build directory in the path ${snpeff_species}.${snpeff_version}"
-            },
-            "vep_cache": {
-                "type": "string",
-                "format": "directory-path",
-                "fa_icon": "fas fa-cloud-download-alt",
-                "default": "s3://annotation-cache/vep_cache/",
-                "description": "Path to VEP cache.",
-                "help_text": "Path to VEP cache which should contain the relevant species, genome and build directories at the path ${vep_species}/${vep_genome}_${vep_cache_version}"
+                "snpeff_cache": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "fa_icon": "fas fa-cloud-download-alt",
+                    "default": "s3://annotation-cache/snpeff_cache/",
+                    "description": "Path to snpEff cache.",
+                    "help_text": "Path to snpEff cache which should contain the relevant genome and build directory in the path ${snpeff_species}.${snpeff_version}"
+                },
+                "vep_cache": {
+                    "type": "string",
+                    "format": "directory-path",
+                    "fa_icon": "fas fa-cloud-download-alt",
+                    "default": "s3://annotation-cache/vep_cache/",
+                    "description": "Path to VEP cache.",
+                    "help_text": "Path to VEP cache which should contain the relevant species, genome and build directories at the path ${vep_species}/${vep_genome}_${vep_cache_version}"
                 }
             }
         },

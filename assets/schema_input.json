@@ -58,7 +58,8 @@
                 "exists": true
             },
             "variantcaller": {
-                "type": "string"
+                "type": "string",
+                "meta": ["variantcaller"]
             }
         },
         "required": ["patient", "sample", "vcf"]

@@ -94,7 +94,7 @@ workflow NFCORE_VARIANTANNOTATION {
     //
     // WORKFLOW: Run pipeline
     //
-    VARIANTANNOTATION (
+    VARIANTANNOTATION(
         samplesheet,
         tools,
         bcftools_annotations,
@@ -122,11 +122,12 @@ workflow NFCORE_VARIANTANNOTATION {
 workflow {
 
     main:
+    versions = Channel.empty()
 
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    PIPELINE_INITIALISATION (
+    PIPELINE_INITIALISATION(
         params.version,
         params.help,
         params.validate_params,
@@ -136,12 +137,12 @@ workflow {
         params.input
     )
 
-    vep_fasta = (params.vep_include_fasta) ? fasta.map{ fasta -> [ [ id:fasta.baseName ], fasta ] } : [[id: 'null'], []]
-    bcftools_annotations_tbi  = params.bcftools_annotations    ? params.bcftools_annotations_tbi ? Channel.fromPath(params.bcftools_annotations_tbi).collect() : PREPARE_GENOME.out.bcftools_annotations_tbi : Channel.empty([])
+    vep_fasta =(params.vep_include_fasta) ? fasta.map{ fasta -> [ [ id:fasta.baseName ], fasta ] } : [[id: 'null'], []]
+    bcftools_annotations_tbi  = params.bcftools_annotations ? params.bcftools_annotations_tbi ? Channel.fromPath(params.bcftools_annotations_tbi).collect() : PREPARE_GENOME.out.bcftools_annotations_tbi : Channel.empty([])
 
     // Download cache
     if (params.download_cache) {
-        // Assuming that even if the cache is provided, if the user specify download_cache, sarek will download the cache
+        // Assuming that even if the cache is provided, if the user specify download_cache, variantannotation will download the cache
         ensemblvep_info = Channel.of([ [ id:"${params.vep_cache_version}_${params.vep_genome}" ], params.vep_genome, params.vep_species, params.vep_cache_version ])
         snpeff_info     = Channel.of([ [ id:"${params.snpeff_genome}.${params.snpeff_db}" ], params.snpeff_genome, params.snpeff_db ])
         DOWNLOAD_CACHE_SNPEFF_VEP(ensemblvep_info, snpeff_info)
@@ -152,16 +153,16 @@ workflow {
     } else {
         // Looks for cache information either locally or on the cloud
         ANNOTATION_CACHE_INITIALISATION(
-            (params.snpeff_cache && params.tools && (params.tools.split(',').contains("snpeff") || params.tools.split(',').contains('merge'))),
+        (params.snpeff_cache && params.tools &&(params.tools.split(',').contains("snpeff") || params.tools.split(',').contains('merge'))),
             params.snpeff_cache,
             params.snpeff_genome,
             params.snpeff_db,
-            (params.vep_cache && params.tools && (params.tools.split(',').contains("vep") || params.tools.split(',').contains('merge'))),
+        (params.vep_cache && params.tools &&(params.tools.split(',').contains("vep") || params.tools.split(',').contains('merge'))),
             params.vep_cache,
             params.vep_species,
             params.vep_cache_version,
             params.vep_genome,
-            "Please refer to https://nf-co.re/sarek/docs/usage/#how-to-customise-snpeff-and-vep-annotation for more information.")
+            "Please refer to https://nf-co.re/variantannotation/docs/usage/#how-to-customise-snpeff-and-vep-annotation for more information.")
 
             snpeff_cache = ANNOTATION_CACHE_INITIALISATION.out.snpeff_cache
             vep_cache    = ANNOTATION_CACHE_INITIALISATION.out.ensemblvep_cache
@@ -169,8 +170,8 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    NFCORE_VARIANTANNOTATION (
-        PIPELINE_INITIALISATION.out.samplesheet,
+    NFCORE_VARIANTANNOTATION(
+        PIPELINE_INITIALISATION.out.samplesheet.map{ meta, vcf -> [ meta + [ id:meta.sample ], vcf ] },
         params.tools,
         bcftools_annotations,
         bcftools_annotations_tbi,
@@ -210,7 +211,7 @@ workflow {
     ch_multiqc_files                      = ch_multiqc_files.mix(NFCORE_VARIANTANNOTATION.out.reports)
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: true))
 
-    MULTIQC (
+    MULTIQC(
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),
         ch_multiqc_custom_config.toList(),
@@ -221,7 +222,7 @@ workflow {
     //
     // SUBWORKFLOW: Run completion tasks
     //
-    PIPELINE_COMPLETION (
+    PIPELINE_COMPLETION(
         params.email,
         params.email_on_fail,
         params.plaintext_email,
