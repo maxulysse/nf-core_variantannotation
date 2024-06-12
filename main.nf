@@ -160,7 +160,7 @@ workflow {
         params.snpeff_genome ? "${params.snpeff_genome}.${params.snpeff_db}" : "${params.genome}.${params.snpeff_db}",
         PREPARE_VARIANTANNOTATION.out.snpeff_cache,
         (params.tools && (params.tools.split(',').contains("merge"))),
-        (params.tools && (params.tools.split(',').contains("vep") || params.tools.split(',').contains('merge'))),
+        (params.tools && (params.tools.split(',').contains("vep"))),
         PREPARE_VARIANTANNOTATION.out.vep_cache,
         params.vep_cache_version,
         PREPARE_VARIANTANNOTATION.out.vep_extra_files,
