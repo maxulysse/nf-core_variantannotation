@@ -7,7 +7,7 @@
                 "nf-core": {
                     "bcftools/annotate": {
                         "branch": "master",
-                        "git_sha": "33ef773a7ea36e88323902f63662aa53c9b88988",
+                        "git_sha": "c1a7fa1c038061b344f2a41be71942061ec40d2e",
                         "installed_by": ["modules"]
                     },
                     "ensemblvep/download": {
