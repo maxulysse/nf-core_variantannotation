@@ -139,6 +139,7 @@ workflow {
         params.vep_cache_version,
         params.vep_include_fasta,
         params.vep_genome,
+        params.vep_custom_args,
         params.dbnsfp,
         params.dbnsfp_tbi,
         params.spliceai_snv,
